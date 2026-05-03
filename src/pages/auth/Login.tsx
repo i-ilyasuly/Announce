@@ -15,42 +15,43 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e511_1px,transparent_1px),linear-gradient(to_bottom,#4f46e511_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--primary)/0.05)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
       
-      <div className="z-10 flex w-full max-w-md flex-col items-center gap-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-[0_0_20px_rgba(79,70,229,0.3)]">
+      <div className="z-10 flex w-full max-w-[400px] flex-col items-center gap-8">
+        <div className="flex items-center gap-3 animate-in fade-in zoom-in duration-500">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/30">
             <Mic2 className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-3xl font-bold tracking-tight text-zinc-100">Announce</span>
+          <span className="text-3xl font-bold tracking-tight text-foreground">Announce</span>
         </div>
 
-        <Card className="w-full border-zinc-800 bg-zinc-900/50 backdrop-blur-xl shadow-2xl">
+        <Card className="w-full shadow-2xl border-border bg-card/50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-2xl font-semibold tracking-tight text-center text-zinc-100">
+            <CardTitle className="text-2xl font-semibold tracking-tight text-center text-card-foreground">
               Welcome back
             </CardTitle>
-            <CardDescription className="text-center text-zinc-400">
+            <CardDescription className="text-center">
               Enter your credentials to access your workspace
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleLogin}>
             <CardContent className="grid gap-5">
               <div className="grid gap-2">
-                <Label htmlFor="email" className="text-zinc-300">Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input 
                   id="email" 
                   type="email" 
                   placeholder="m@example.com" 
                   required 
-                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-indigo-500" 
+                  className="bg-background/50" 
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-zinc-300">Password</Label>
-                  <a href="#" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+                  <Label htmlFor="password">Password</Label>
+                  <a href="#" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
                     Forgot password?
                   </a>
                 </div>
@@ -58,19 +59,19 @@ export default function Login() {
                   id="password" 
                   type="password" 
                   required 
-                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-indigo-500" 
+                  className="bg-background/50" 
                 />
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-lg shadow-indigo-600/20">
+              <Button type="submit" className="w-full font-medium shadow-md">
                 Sign In
               </Button>
             </CardFooter>
           </form>
         </Card>
         
-        <p className="text-center text-sm text-zinc-500">
+        <p className="text-center text-sm text-muted-foreground animate-in fade-in duration-500 delay-300">
           Secure Multi-tenant SaaS Platform
         </p>
       </div>

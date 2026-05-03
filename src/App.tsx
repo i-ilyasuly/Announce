@@ -6,23 +6,29 @@ import LiveAnnouncement from './pages/dashboard/LiveAnnouncement';
 import Schedule from './pages/dashboard/Schedule';
 import Templates from './pages/dashboard/Templates';
 import Settings from './pages/dashboard/Settings';
+import { ThemeProvider } from './components/theme-provider';
+import { ModuleProvider } from './components/module-provider';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/module-select" element={<ModuleSelect />} />
-        
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/dashboard/live" replace />} />
-          <Route path="live" element={<LiveAnnouncement />} />
-          <Route path="schedule" element={<Schedule />} />
-          <Route path="templates" element={<Templates />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="system" storageKey="dictor-theme">
+      <ModuleProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/module-select" element={<ModuleSelect />} />
+            
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Navigate to="/dashboard/live" replace />} />
+              <Route path="live" element={<LiveAnnouncement />} />
+              <Route path="schedule" element={<Schedule />} />
+              <Route path="templates" element={<Templates />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ModuleProvider>
+    </ThemeProvider>
   );
 }
 
