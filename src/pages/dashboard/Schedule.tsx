@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Play, Plus, Search, Calendar as CalendarIcon, Clock, Edit2, Trash2, Webhook } from "lucide-react";
+import { Play, Plus, Search, Calendar as CalendarIcon, Clock, Edit2, Trash2, Webhook, CalendarX2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useModule } from "@/src/components/module-provider";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export default function Schedule() {
   const { moduleType } = useModule();
@@ -39,6 +41,8 @@ export default function Schedule() {
           { id: "EVT-02", time: "12:00 PM", destination: "Food Court", status: "Scheduled", type: "Event", auto: true },
           { id: "EVT-03", time: "18:45 PM", destination: "All Floors", status: "Closing", type: "Store", auto: true },
         ];
+      default:
+        return [];
     }
   };
 
@@ -51,8 +55,26 @@ export default function Schedule() {
     }
   };
 
-  const mockSchedules = getMockData();
+  const [schedules, setSchedules] = useState(getMockData());
   const headers = getHeaders();
+
+  useEffect(() => {
+    setSchedules(getMockData());
+  }, [moduleType]);
+
+  const handleDelete = (id: string) => {
+    setSchedules(prev => prev.filter(s => s.id !== id));
+    toast.success(`Entry ${id} successfully removed from schedule.`);
+  };
+
+  const handlePlayStatus = () => {
+    toast.success("Playing automated status announcement...");
+  };
+
+  const handleRestore = () => {
+    setSchedules(getMockData());
+    toast.info("Schedule restored with mock data.");
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -88,11 +110,9 @@ export default function Schedule() {
           </Button>
           
           <Dialog>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm font-medium">
+            <DialogTrigger render={<Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-sm font-medium" />}>
                 <Plus className="h-4 w-4" />
                 Add Manual Entry
-              </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-card border-border">
               <DialogHeader>
@@ -123,7 +143,7 @@ export default function Schedule() {
         </div>
       </div>
 
-      <Card className="border-border bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden">
+      <Card className="border-border bg-card/60 backdrop-blur-sm shadow-sm overflow-hidden flex flex-col min-h-[400px]">
         <CardHeader className="border-b border-border/50 pb-4 pt-5 px-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium bg-secondary/50 px-3 py-1.5 rounded-md border border-border/50">
@@ -143,57 +163,70 @@ export default function Schedule() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-secondary/40">
-                <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="w-[120px] font-semibold">{headers.id}</TableHead>
-                  <TableHead className="font-semibold">Time</TableHead>
-                  <TableHead className="font-semibold">{headers.dest}</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="font-semibold text-center w-[100px]">Trigger</TableHead>
-                  <TableHead className="text-right font-semibold pr-6">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockSchedules.map((schedule) => (
-                  <TableRow key={schedule.id} className="border-border/50 transition-colors hover:bg-secondary/20">
-                    <TableCell className="font-bold text-foreground">{schedule.id}</TableCell>
-                    <TableCell className="text-muted-foreground font-medium">{schedule.time}</TableCell>
-                    <TableCell className="font-medium">{schedule.destination}</TableCell>
-                    <TableCell>
-                      {getStatusBadge(schedule.status)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {schedule.auto ? (
-                        <div className="inline-flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
-                          <Webhook className="mr-1 h-3 w-3" /> Auto
-                        </div>
-                      ) : (
-                        <div className="inline-flex items-center text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20">
-                           Manual
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right pr-4">
-                      <div className="flex justify-end gap-1">
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full" title="Play Announcment">
-                          <Play className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full">
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+        <CardContent className="p-0 flex-1 flex flex-col">
+          {schedules.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-12 text-center h-[300px]">
+              <div className="h-20 w-20 bg-secondary/50 rounded-full flex items-center justify-center mb-6">
+                <CalendarX2 className="h-10 w-10 text-muted-foreground opacity-50" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No active schedule found</h3>
+              <p className="text-muted-foreground max-w-sm mb-6">There are currently no active events or tasks in the schedule. Ensure the API webhook is synced or add a manual entry.</p>
+              <Button onClick={handleRestore} variant="outline" className="border-border hover:bg-secondary">
+                <Plus className="h-4 w-4 mr-2" /> Restore Mock Data
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-secondary/40">
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="w-[120px] font-semibold">{headers.id}</TableHead>
+                    <TableHead className="font-semibold">Time</TableHead>
+                    <TableHead className="font-semibold">{headers.dest}</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold text-center w-[100px]">Trigger</TableHead>
+                    <TableHead className="text-right font-semibold pr-6">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {schedules.map((schedule) => (
+                    <TableRow key={schedule.id} className="border-border/50 transition-colors hover:bg-secondary/20">
+                      <TableCell className="font-bold text-foreground">{schedule.id}</TableCell>
+                      <TableCell className="text-muted-foreground font-medium">{schedule.time}</TableCell>
+                      <TableCell className="font-medium">{schedule.destination}</TableCell>
+                      <TableCell>
+                        {getStatusBadge(schedule.status)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {schedule.auto ? (
+                          <div className="inline-flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                            <Webhook className="mr-1 h-3 w-3" /> Auto
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20">
+                            Manual
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right pr-4">
+                        <div className="flex justify-end gap-1">
+                          <Button onClick={handlePlayStatus} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full" title="Play Announcment">
+                            <Play className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full">
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button onClick={() => handleDelete(schedule.id)} variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

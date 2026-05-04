@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Mic2, 
@@ -13,7 +13,9 @@ import {
   Plane,
   Train,
   Bus,
-  ShoppingBag
+  ShoppingBag,
+  Globe,
+  History
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,6 +36,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { moduleType, setModuleType, facilityName, setFacilityName } = useModule();
+  const [uiLanguage, setUiLanguage] = useState<'EN' | 'RU' | 'KK'>('EN');
 
   const getNavigation = (type: ModuleType) => {
     let scheduleName = 'Schedule';
@@ -43,9 +46,11 @@ export default function DashboardLayout() {
     if (type === 'mall') scheduleName = 'Events/Promos';
 
     return [
+      { name: 'Overview', href: '/dashboard/overview', icon: LayoutDashboard },
       { name: 'Live Announcement', href: '/dashboard/live', icon: Mic2 },
       { name: scheduleName, href: '/dashboard/schedule', icon: Calendar },
       { name: 'Templates', href: '/dashboard/templates', icon: MessageSquare },
+      { name: 'History & Logs', href: '/dashboard/history', icon: History },
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ];
   };
@@ -169,15 +174,78 @@ export default function DashboardLayout() {
               <span className="text-secondary-foreground">Audio Linked</span>
             </div>
             
+            <DropdownMenu>
+              <DropdownMenuTrigger className="w-9 h-9 flex items-center justify-center rounded-full border border-transparent hover:border-border hover:bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-primary/20">
+                <Globe className="h-[1.15rem] w-[1.15rem] text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-32">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Interface Language</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setUiLanguage('EN')} className="flex items-center justify-between">
+                    <span>🇬🇧 English</span>
+                    {uiLanguage === 'EN' && <span className="text-primary text-xs">✓</span>}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setUiLanguage('RU')} className="flex items-center justify-between">
+                    <span>🇷🇺 Русский</span>
+                    {uiLanguage === 'RU' && <span className="text-primary text-xs">✓</span>}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setUiLanguage('KK')} className="flex items-center justify-between">
+                    <span>🇰🇿 Қазақша</span>
+                    {uiLanguage === 'KK' && <span className="text-primary text-xs">✓</span>}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <ThemeToggle />
             
-            <button className="relative text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-full hover:bg-secondary">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1.5 flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-pulse"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="relative text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-full hover:bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-primary/20">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1.5 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-pulse"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+                  <span className="font-semibold text-sm">Notifications</span>
+                  <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground">
+                    Mark all as read
+                  </Button>
+                </div>
+                <div className="flex flex-col max-h-[300px] overflow-y-auto">
+                  <div className="px-4 py-3 border-b border-border/50 hover:bg-secondary/50 cursor-pointer transition-colors">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-sm font-medium">New feature available</span>
+                      <span className="text-[10px] text-muted-foreground">Just now</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">The new neural voices have been deployed. Check them out in the speech editor!</p>
+                  </div>
+                  <div className="px-4 py-3 border-b border-border/50 hover:bg-secondary/50 cursor-pointer transition-colors opacity-70">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-sm font-medium">System update</span>
+                      <span className="text-[10px] text-muted-foreground">2 hours ago</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">Scheduled maintenance completed successfully. All systems operational.</p>
+                  </div>
+                  <div className="px-4 py-3 hover:bg-secondary/50 cursor-pointer transition-colors opacity-70">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-sm font-medium">API key warning</span>
+                      <span className="text-[10px] text-muted-foreground">1 day ago</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">Your Google API key is nearing its quota limit. Please review your billing.</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator className="m-0" />
+                <div className="p-2 text-center">
+                  <Button variant="ghost" size="sm" className="w-full text-xs text-primary">
+                    View all notifications
+                  </Button>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <div className="flex items-center border-l border-border pl-4 sm:pl-6">
               <DropdownMenu>
@@ -187,16 +255,16 @@ export default function DashboardLayout() {
                   </Avatar>
                   <div className="text-left hidden sm:block">
                     <p className="text-sm font-semibold leading-none text-foreground">Super Admin</p>
-                    <p className="text-xs text-muted-foreground mt-1">dictor.kz</p>
+                    <p className="text-xs text-muted-foreground mt-1">announce.ai</p>
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Billing</DropdownMenuItem>
-                    <DropdownMenuItem>Team settings</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/dashboard/profile')} className="cursor-pointer">Profile</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/dashboard/billing')} className="cursor-pointer">Billing</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/dashboard/team')} className="cursor-pointer">Team settings</DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/')} className="text-destructive">Log out</DropdownMenuItem>

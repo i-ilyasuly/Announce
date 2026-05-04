@@ -129,17 +129,17 @@ export default function Settings() {
           <CardContent className="space-y-8 pt-6">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <Label htmlFor="google-tts" className="text-foreground font-semibold">Google Cloud TTS API Key</Label>
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">Verified</span>
+                <Label htmlFor="google-tts" className="text-foreground font-semibold">Gemini API Key (Flash TTS)</Label>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">Active</span>
               </div>
               <div className="flex gap-3">
                 <Input 
                   id="google-tts" 
                   type="password"
-                  defaultValue="AIzaSyA8Bds8sd8sfd88sfa8sf8dSF" 
+                  defaultValue="vV98ds09f89vV-s098fsd09f_s09f8vV9" 
                   className="bg-background border-input font-mono shadow-sm h-11" 
                 />
-                <Button variant="outline" className="h-11 px-6 font-semibold shadow-sm border-border">Veify Key</Button>
+                <Button variant="outline" className="h-11 px-6 font-semibold shadow-sm border-border">Verify Key</Button>
               </div>
             </div>
 
@@ -150,7 +150,7 @@ export default function Settings() {
               <div className="flex gap-3">
                 <Input 
                   id="fids-api" 
-                  defaultValue={`https://api.dictor.kz/v1/webhooks/${moduleType}/webhook-endpoint`} 
+                  defaultValue={`https://api.announce.ai/v1/webhooks/${moduleType}/webhook-endpoint`} 
                   readOnly
                   className="bg-muted border-input text-muted-foreground font-mono cursor-not-allowed shadow-inner h-11" 
                 />

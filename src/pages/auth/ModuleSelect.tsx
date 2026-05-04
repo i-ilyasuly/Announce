@@ -74,7 +74,7 @@ export default function ModuleSelect() {
           
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <ThemeToggle />
-            <span>admin@dictor.kz</span>
+            <span>admin@announce.ai</span>
             <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center font-medium text-secondary-foreground border border-border">
               A
             </div>

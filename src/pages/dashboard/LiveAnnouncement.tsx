@@ -2,13 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlayCircle, Volume2, Sparkles, AlertCircle, Clock, VolumeX } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
+import { PlayCircle, Volume2, Sparkles, AlertCircle, Clock, VolumeX, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useModule } from "@/src/components/module-provider";
+import { toast } from "sonner";
 
 export default function LiveAnnouncement() {
   const [text, setText] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const { moduleType } = useModule();
 
   const getQuickActions = () => {
@@ -50,6 +53,34 @@ export default function LiveAnnouncement() {
   };
 
   const quickActions = getQuickActions();
+  const estimatedTime = Math.max(1, Math.round(text.length / 15));
+
+  const handleGenerateAndPlay = () => {
+    if (text.length === 0) return;
+
+    // Simulate API check
+    if (text.toLowerCase().includes("error")) {
+      toast.error("Error: API Key is missing or invalid. Please check Settings.");
+      return;
+    }
+
+    setIsGenerating(true);
+    toast.info("Generating audio from Google API...");
+
+    // Simulate network delay for TTS generation (1-2 seconds)
+    setTimeout(() => {
+      setIsGenerating(false);
+      setIsPlaying(true);
+      toast.success("Audio generated! Playing now...");
+
+      // Simulate playing time based on text length
+      setTimeout(() => {
+        setIsPlaying(false);
+        toast.success("Announcement finished.");
+        setText("");
+      }, estimatedTime * 1000);
+    }, 1500 + Math.random() * 1000);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -61,20 +92,33 @@ export default function LiveAnnouncement() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Main Editor */}
         <div className="xl:col-span-2 space-y-6">
-          <Card className="border-border bg-card/60 backdrop-blur-sm shadow-sm">
+          <Card className={`border-border bg-card/60 backdrop-blur-sm shadow-sm transition-all duration-300 ${isPlaying ? 'border-primary/50 ring-1 ring-primary/20' : ''}`}>
             <CardHeader className="pb-4 border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Volume2 className="h-5 w-5 text-primary" />
+                    <Volume2 className={`h-5 w-5 ${isPlaying ? 'text-primary animate-pulse' : 'text-primary'}`} />
                     Message Editor
                   </CardTitle>
                   <CardDescription>Enter the text you want to be spoken</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="bg-secondary/50 border-border hover:bg-secondary">
-                  <Sparkles className="mr-2 h-4 w-4 text-primary" />
-                  AI Improve
-                </Button>
+                {isPlaying && (
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20">
+                    <span className="flex gap-0.5 items-end h-3">
+                      <span className="w-1 bg-primary animate-[bounce_1s_infinite_0s] rounded-t-sm" style={{height: '100%'}}></span>
+                      <span className="w-1 bg-primary animate-[bounce_1s_infinite_0.2s] rounded-t-sm" style={{height: '60%'}}></span>
+                      <span className="w-1 bg-primary animate-[bounce_1s_infinite_0.4s] rounded-t-sm" style={{height: '80%'}}></span>
+                      <span className="w-1 bg-primary animate-[bounce_1s_infinite_0.6s] rounded-t-sm" style={{height: '40%'}}></span>
+                    </span>
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider ml-1">Playing 🔊</span>
+                  </div>
+                )}
+                {!isPlaying && (
+                  <Button variant="outline" size="sm" className="bg-secondary/50 border-border hover:bg-secondary">
+                    <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                    AI Improve
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
@@ -86,6 +130,7 @@ export default function LiveAnnouncement() {
                     size="sm" 
                     className="rounded-full bg-secondary/80 hover:bg-secondary border border-border/50 transition-all font-medium text-xs"
                     onClick={() => setText(action.text)}
+                    disabled={isGenerating || isPlaying}
                   >
                     <action.icon className={`mr-2 h-3.5 w-3.5 ${action.color}`} />
                     {action.label}
@@ -95,15 +140,16 @@ export default function LiveAnnouncement() {
               
               <Textarea 
                 placeholder={getPlaceholder()} 
-                className="min-h-[220px] text-lg lg:text-xl leading-relaxed resize-none bg-background/50 border-input shadow-inner focus-visible:ring-primary focus-visible:ring-1 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+                className={`min-h-[220px] text-lg lg:text-xl leading-relaxed resize-none bg-background/50 border-input shadow-inner focus-visible:ring-primary focus-visible:ring-1 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 ${isPlaying ? 'opacity-80' : ''}`}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
+                disabled={isGenerating || isPlaying}
               />
               
               <div className="flex justify-between items-center text-sm mt-2 text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                    <Clock className="h-3.5 w-3.5" />
-                   Estimated ~{Math.max(1, Math.round(text.length / 15))} seconds
+                   Estimated ~{estimatedTime} seconds
                 </span>
                 <span className="font-medium">{text.length} / 500</span>
               </div>
@@ -119,36 +165,70 @@ export default function LiveAnnouncement() {
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">Language Profile</Label>
-                <Select defaultValue="en">
+                <Label className="text-sm font-semibold">Audio Jingle (Pre-Announce)</Label>
+                <Select defaultValue="standard" disabled={isGenerating || isPlaying}>
                   <SelectTrigger className="bg-background border-input shadow-sm h-11">
-                    <SelectValue placeholder="Select Language" />
+                    <SelectValue placeholder="Select Jingle" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">🇺🇸 English (US)</SelectItem>
-                    <SelectItem value="kk">🇰🇿 Kazakh (KZ)</SelectItem>
-                    <SelectItem value="ru">🇷🇺 Russian (RU)</SelectItem>
+                    <SelectItem value="none">No Jingle</SelectItem>
+                    <SelectItem value="standard">Standard Chime (Ding-Dong)</SelectItem>
+                    <SelectItem value="urgent">Urgent Alert (3 Beeps)</SelectItem>
+                    <SelectItem value="soft">Soft Notification</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold">Language & Auto-Translate</Label>
+                <Select defaultValue="en" disabled={isGenerating || isPlaying}>
+                  <SelectTrigger className="bg-background border-input shadow-sm h-11">
+                    <SelectValue placeholder="Select Language or Cascade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Single Language</SelectLabel>
+                      <SelectItem value="en">🇺🇸 English (US)</SelectItem>
+                      <SelectItem value="kk">🇰🇿 Kazakh (KZ)</SelectItem>
+                      <SelectItem value="ru">🇷🇺 Russian (RU)</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Auto-Translate Cascades</SelectLabel>
+                      <SelectItem value="en-kk">EN → KZ Cascade</SelectItem>
+                      <SelectItem value="kk-ru-en">KZ → RU → EN Cascade</SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-3">
                 <Label className="text-sm font-semibold">AI Voice Engine</Label>
-                <Select defaultValue="neural2-f">
+                <Select defaultValue="gemini-aoede" disabled={isGenerating || isPlaying}>
                   <SelectTrigger className="bg-background border-input shadow-sm h-11">
                     <SelectValue placeholder="Select Voice" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="neural2-f">Professional Female (Neural2)</SelectItem>
-                    <SelectItem value="neural2-d">Authoritative Male (Neural2)</SelectItem>
-                    <SelectItem value="standard-a">Standard Female</SelectItem>
+                    <SelectGroup>
+                      <SelectLabel>Gemini 3.1 Flash</SelectLabel>
+                      <SelectItem value="gemini-aoede">Aoede (Warm, Professional)</SelectItem>
+                      <SelectItem value="gemini-charon">Charon (Deep, Authoritative)</SelectItem>
+                      <SelectItem value="gemini-fenrir">Fenrir (Strong, Direct)</SelectItem>
+                      <SelectItem value="gemini-kore">Kore (Clear, Calm)</SelectItem>
+                      <SelectItem value="gemini-puck">Puck (Energetic)</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Legacy Cloud TTS</SelectLabel>
+                      <SelectItem value="neural2-f">Professional Female (Neural2)</SelectItem>
+                      <SelectItem value="neural2-d">Authoritative Male (Neural2)</SelectItem>
+                      <SelectItem value="standard-a">Standard Female</SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-3">
                 <Label className="text-sm font-semibold">Speaker Zoning</Label>
-                <Select defaultValue="all">
+                <Select defaultValue="all" disabled={isGenerating || isPlaying}>
                   <SelectTrigger className="bg-background border-input shadow-sm h-11">
                     <SelectValue placeholder="Select Zone" />
                   </SelectTrigger>
@@ -164,18 +244,37 @@ export default function LiveAnnouncement() {
 
           <div className="space-y-3">
             <Button 
+              disabled={text.length === 0 || isGenerating || isPlaying}
+              onClick={handleGenerateAndPlay}
               className={`w-full h-14 text-lg gap-3 font-semibold shadow-lg transition-all ${
-                text.length > 0 
+                text.length > 0 && !isGenerating && !isPlaying
                   ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/25' 
-                  : 'bg-muted text-muted-foreground shadow-none cursor-not-allowed hover:bg-muted'
+                  : (isGenerating || isPlaying) 
+                    ? 'bg-primary/80 text-primary-foreground cursor-wait'
+                    : 'bg-muted text-muted-foreground shadow-none hover:bg-muted'
               }`}
             >
-              <PlayCircle className={`h-6 w-6 ${text.length > 0 ? "animate-pulse" : ""}`} />
-              Generate & Play
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  Loading...
+                </>
+              ) : isPlaying ? (
+                <>
+                  <Volume2 className="h-6 w-6 animate-pulse" />
+                  Playing Audio...
+                </>
+              ) : (
+                <>
+                  <PlayCircle className={`h-6 w-6 ${text.length > 0 ? "animate-pulse" : ""}`} />
+                  Generate & Play
+                </>
+              )}
             </Button>
             
             <Button 
               variant="outline" 
+              disabled={isGenerating || isPlaying}
               className="w-full h-12 gap-2 text-muted-foreground hover:text-foreground border-border hover:bg-secondary"
               onClick={() => setText("")}
             >
